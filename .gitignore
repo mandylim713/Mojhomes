@@ -1,0 +1,22 @@
+# Local overrides
+config.local.php
+
+# Live data — never commit (it is backed up automatically to the db-backup branch)
+storage/*.sqlite
+storage/*.sqlite-*
+storage/*.json
+storage/*.lock
+storage/*.pid
+storage/*.zip
+storage/snapshot-*
+storage/restore-*
+storage/logs/*
+storage/proofs/*
+uploads/products/*
+uploads/gallery/*
+uploads/categories/*
+!**/.keep
+!**/.htaccess
+
+.DS_Store
+Thumbs.db

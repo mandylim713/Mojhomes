@@ -1,0 +1,15 @@
+.git
+.gitignore
+config.local.php
+storage/*.sqlite*
+storage/*.json
+storage/*.lock
+storage/*.pid
+storage/logs/*.log
+storage/proofs/*
+!storage/proofs/.keep
+uploads/products/*
+uploads/gallery/*
+uploads/categories/*
+!uploads/*/.keep
+*.md
