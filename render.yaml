@@ -1,49 +1,23 @@
 # Render Blueprint — Mojhometouch website
-# Render dashboard → New → Blueprint → pick this repository. Fill the "sync: false" values when asked.
 services:
   - type: web
     name: mojhometouch
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter                 # Starter keeps the site awake and allows the disk below.
-    region: frankfurt             # closest Render region to Nigeria
-    autoDeploy: true              # every push to the main branch redeploys automatically
+    plan: free
+    region: frankfurt
+    autoDeploy: true
     healthCheckPath: /healthz.php
-    maxShutdownDelaySeconds: 90   # time for the final backup before a restart/deploy
-    buildFilter:
-      ignoredPaths:
-        - backups/**
-        - "*.md"
-    disk:                         # keeps the database and uploads between deploys
-      name: moj-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: DATA_DIR
         value: /var/data
       - key: TRUST_PROXY
         value: "1"
-      - key: SITE_URL             # e.g. https://mojhometouch.onrender.com or your own domain
-        sync: false
-      - key: ADMIN_EMAIL          # first admin login (only used when the database is created)
-        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@mojhometouch.com
       - key: ADMIN_PASSWORD
-        sync: false
-      - key: GITHUB_BACKUP_REPO   # e.g. yourname/mojhometouch  (must be a PRIVATE repo)
-        sync: false
-      - key: GITHUB_BACKUP_TOKEN  # fine-grained token with "Contents: Read and write" on that repo
-        sync: false
+        value: Moj@Admin2026
+      - key: GITHUB_BACKUP_REPO
+        value: ElDera7/mojhometouch
       - key: GITHUB_BACKUP_BRANCH
         value: db-backup
-      - key: SMTP_HOST            # outgoing email for order notifications
-        sync: false
-      - key: SMTP_PORT
-        value: "587"
-      - key: SMTP_SECURE
-        value: tls
-      - key: SMTP_USER
-        sync: false
-      - key: SMTP_PASS
-        sync: false
-      - key: MAIL_FROM
-        sync: false
