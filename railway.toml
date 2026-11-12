@@ -1,0 +1,14 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "/var/www/html/docker/entrypoint.sh"
+healthcheckPath = "/healthz.php"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+# Railway persistent volume is mounted at /var/data via Railway dashboard
+# Set environment variable DATA_DIR=/var/data in Railway service settings
+

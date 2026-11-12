@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # Mojhometouch container start-up:
-#  1. Listen on Render's $PORT
+#  1. Listen on $PORT (Render / Railway compatible)
 #  2. Keep data on the persistent disk ($DATA_DIR) when one is attached
-#  3. Restore the latest backup if there is no database (new deploy / restart)
-#  4. Back up automatically every minute (only when something changed)
-#  5. Take a final backup when Render stops the container
+#  3. Seed DB from docker/seed.sql if no database exists (first deploy)
+#  4. Restore the latest backup if there is no database (new deploy / restart)
+#  5. Back up automatically every minute (only when something changed)
+#  6. Take a final backup when the container stops
 set -u
 APP=${APP_DIR:-/var/www/html}
 PORT="${PORT:-10000}"
@@ -32,6 +33,15 @@ mkdir -p "$APP/storage/logs" "$APP/storage/proofs" "$APP/uploads/products" "$APP
 
 echo "[moj] checking database / restoring backup if needed…"
 as_app php "$APP/cli/backup.php" restore-if-missing || echo "[moj] restore step reported a problem — see Admin → Backups"
+
+# --- Seed from committed SQL if DB still missing (Railway first deploy / no GitHub token) ---
+DB_FILE="${DATA_DIR:-$APP/storage}/mojhometouch.sqlite"
+# also check the symlinked path
+if [ ! -f "$APP/storage/mojhometouch.sqlite" ] && [ -f "$APP/docker/seed.sql" ]; then
+  echo "[moj] no database found — seeding from docker/seed.sql…"
+  as_app sqlite3 "$APP/storage/mojhometouch.sqlite" < "$APP/docker/seed.sql" && echo "[moj] seed complete" || echo "[moj] seed failed"
+fi
+
 APP_DIR="$APP" as_app php -r 'require (getenv("APP_DIR") ?: "/var/www/html") . "/includes/bootstrap.php"; db(); echo "[moj] database ready\n";'
 
 ( while true; do
