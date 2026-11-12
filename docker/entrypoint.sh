@@ -43,6 +43,9 @@ if [ ! -f "$APP/storage/mojhometouch.sqlite" ] && [ -f "$APP/docker/seed.sql" ];
 fi
 
 APP_DIR="$APP" as_app php -r 'require (getenv("APP_DIR") ?: "/var/www/html") . "/includes/bootstrap.php"; db(); echo "[moj] database ready\n";'
+if [ -f "$APP/scripts/update_products.php" ]; then
+  APP_DIR="$APP" as_app php "$APP/scripts/update_products.php" || true
+fi
 
 ( while true; do
     sleep "${BACKUP_LOOP_SECONDS:-60}"

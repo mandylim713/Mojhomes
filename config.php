@@ -12,16 +12,39 @@ $env = static function (string $k, $default = null) {
     return ($v === false || $v === '') ? $default : $v;
 };
 
+// Auto-detect Railway or standard MySQL environment variables
+$dbUrl = $env('MYSQL_URL', $env('DATABASE_URL'));
+$mysqlHost = $env('MYSQLHOST', $env('MYSQL_HOST', 'localhost'));
+$mysqlUser = $env('MYSQLUSER', $env('MYSQL_USER', ''));
+$mysqlPass = $env('MYSQLPASSWORD', $env('MYSQL_PASSWORD', ''));
+$mysqlDb   = $env('MYSQLDATABASE', $env('MYSQL_DATABASE', ''));
+$mysqlPort = (int) $env('MYSQLPORT', $env('MYSQL_PORT', 3306));
+
+if ($dbUrl && (str_starts_with($dbUrl, 'mysql://') || str_starts_with($dbUrl, 'mysql:'))) {
+    $parts = parse_url($dbUrl);
+    if ($parts) {
+        if (!empty($parts['host'])) $mysqlHost = $parts['host'];
+        if (!empty($parts['port'])) $mysqlPort = (int) $parts['port'];
+        if (!empty($parts['user'])) $mysqlUser = $parts['user'];
+        if (!empty($parts['pass'])) $mysqlPass = $parts['pass'];
+        if (!empty($parts['path'])) $mysqlDb   = ltrim($parts['path'], '/');
+    }
+}
+
+// Auto-select mysql if credentials exist, unless DB_DRIVER is explicitly forced
+$hasMysql = !empty($mysqlDb) && $mysqlHost !== 'localhost';
+$defaultDriver = $hasMysql ? 'mysql' : 'sqlite';
+
 return [
-    'db_driver'   => $env('DB_DRIVER', 'sqlite'),                        // 'sqlite' or 'mysql'
+    'db_driver'   => $env('DB_DRIVER', $defaultDriver),                        // 'sqlite' or 'mysql'
     'sqlite_path' => __DIR__ . '/storage/mojhometouch.sqlite',
 
     'mysql' => [
-        'host' => $env('MYSQL_HOST', 'localhost'),
-        'port' => (int) $env('MYSQL_PORT', 3306),
-        'name' => $env('MYSQL_DATABASE', ''),
-        'user' => $env('MYSQL_USER', ''),
-        'pass' => $env('MYSQL_PASSWORD', ''),
+        'host' => $mysqlHost,
+        'port' => $mysqlPort,
+        'name' => $mysqlDb,
+        'user' => $mysqlUser,
+        'pass' => $mysqlPass,
     ],
 
     // Full site address, no trailing slash, e.g. https://mojhometouch.com — blank = auto-detect
