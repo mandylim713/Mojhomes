@@ -6,6 +6,8 @@ RUN apt-get update \
  && docker-php-ext-configure gd --with-jpeg --with-webp \
  && docker-php-ext-install -j"$(nproc)" gd pdo_mysql zip exif \
  && a2enmod rewrite headers expires deflate remoteip \
+ && a2dismod mpm_event mpm_worker 2>/dev/null || true \
+ && a2enmod mpm_prefork \
  && rm -rf /var/lib/apt/lists/*
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-mojhometouch.ini
