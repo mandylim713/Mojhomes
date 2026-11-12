@@ -5,9 +5,8 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends libjpeg62-turbo-dev libpng-dev libwebp-dev libzip-dev ca-certificates sqlite3 \
  && docker-php-ext-configure gd --with-jpeg --with-webp \
  && docker-php-ext-install -j"$(nproc)" gd pdo_mysql zip exif \
- && a2enmod rewrite headers expires deflate remoteip \
- && a2dismod mpm_event mpm_worker 2>/dev/null || true \
- && a2enmod mpm_prefork \
+ && rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* \
+ && a2enmod rewrite headers expires deflate remoteip mpm_prefork \
  && rm -rf /var/lib/apt/lists/*
 
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-mojhometouch.ini

@@ -62,6 +62,10 @@ shutdown() {
 }
 trap shutdown TERM INT
 
+# Ensure only mpm_prefork is active (fixes AH00534: More than one MPM loaded)
+rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
+a2enmod mpm_prefork 2>/dev/null || true
+
 if [ -n "${SERVER_CMD:-}" ]; then
   bash -c "$SERVER_CMD" &          # used for local testing
 else
